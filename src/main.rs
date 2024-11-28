@@ -6,6 +6,7 @@ use wry::{
     WebView, WebViewBuilder,
 };
 
+#[derive(Default)]
 struct WebViewWrapper {
     pub inner: Option<WebView>,
 }
@@ -18,21 +19,11 @@ fn main() {
                 clip_children: false,
                 ..default()
             }),
-            ..Default::default()
+            ..default()
         }))
-        .add_systems(
-            Startup,
-            (
-                setup_wrapper.before(setup_wry),
-                setup_wry,
-                setup_scene.after(setup_wry),
-            ),
-        )
+        .add_systems(Startup, (setup_wry, setup_scene.after(setup_wry)))
+        .init_non_send_resource::<WebViewWrapper>()
         .run();
-}
-
-fn setup_wrapper(world: &mut World) {
-    world.insert_non_send_resource(WebViewWrapper { inner: None });
 }
 
 fn setup_wry(
@@ -71,8 +62,25 @@ fn setup_scene(
     commands.spawn((
         Mesh3d(meshes.add(Circle::new(4.0))),
         MeshMaterial3d(materials.add(Color::WHITE)),
+        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     ));
-
+    // cube
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
+        Transform::from_xyz(0.0, 0.5, 0.0),
+    ));
+    // light
+    commands.spawn((
+        PointLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        Transform::from_xyz(4.0, 8.0, 4.0),
+    ));
     // camera
-    commands.spawn((Camera3d::default(),));
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 }
