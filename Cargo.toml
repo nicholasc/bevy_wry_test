@@ -1,0 +1,8 @@
+[package]
+name = "bevy_wry_tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { path = "../../oss/bevy" }
+wry = { version = "0.47.2", features = ["transparent"] }
